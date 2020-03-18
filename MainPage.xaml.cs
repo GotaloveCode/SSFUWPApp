@@ -1,5 +1,5 @@
 ﻿using System;
-using Windows.UI.Xaml;
+using Windows.Foundation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
@@ -16,12 +16,24 @@ namespace SSF_Intranet
         public MainPage()
         {
             this.InitializeComponent();
+            MyWebView.UnviewableContentIdentified += MyWebView_UnviewableContentIdentified;
         }
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Uri u = new Uri("http://somaliastabilityke.masterpiecefusion.com"); //http://ssf.masterpiecefusion.com/
-            MyWebView.Navigate(u);
-        }
+            var uristring = e.Parameter as string;
+            if (uristring != "")
+            {
+                string[] parts = uristring.ToString().Split(':');
+                string p = parts[1].Substring(1, parts[1].Length - 1);
+                uristring = "https://somaliastabilityke.sharepoint.com/sites/ssf2" + p;                
+                Uri u = new Uri(uristring); 
+                MyWebView.Navigate(u);
+            }else
+            {
+                Uri u = new Uri("https://somaliastabilityke.sharepoint.com/sites/ssf2"); 
+                MyWebView.Navigate(u);
+            }
+        }        
 
 
         private void MyWebView_NavigationStarting(WebView sender, WebViewNavigationStartingEventArgs args)
@@ -33,6 +45,14 @@ namespace SSF_Intranet
         {
             ProgressRing1.IsActive = false; //for progress ring  
         }
+
+        private void MyWebView_UnviewableContentIdentified(WebView sender,WebViewUnviewableContentIdentifiedEventArgs args)
+        {
+            Windows.Foundation.IAsyncOperation<bool> b =
+            Windows.System.Launcher.LaunchUriAsync(args.Uri);
+        }
+
+
 
     }
 }
